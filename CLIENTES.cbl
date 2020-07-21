@@ -12,7 +12,6 @@
       * ANALISTA : VITOR MARTINS LYRA                                  *
       *     DATA : 22/04/2020                                          *
       *                                                                *
-      * OBJETIVO : CRIAR O MENU PRINCIPAL                              *
       * PROJETO  : SISTEMA DE GESTAO DE CLIENTES                       *
       *----------------------------------------------------------------*
       *                                                                *
@@ -23,9 +22,30 @@
       *----------------------------------------------------------------*
        ENVIRONMENT DIVISION.
       *----------------------------------------------------------------*
+
+      *----------------------------------------------------------------*
+       INPUT-OUTPUT SECTION.
+      *----------------------------------------------------------------*
+       FILE-CONTROL.
+      *----------------------------------------------------------------*
+           SELECT CLIENTES ASSIGN TO
+                                  'D:\Estudos\Alura\Cobol\CLIENTES.DAT'
+             ORGANIZATION IS INDEXED
+             ACCESS MODE  IS RANDOM
+             FILE STATUS  IS WRK-CLIENTES-STATUS
+             RECORD KEY   IS  CLIENTES-CHAVE.
+
       *----------------------------------------------------------------*
        DATA DIVISION.
       *----------------------------------------------------------------*
+       FILE SECTION.
+      *----------------------------------------------------------------*
+       FD CLIENTES.
+          01 CLIENTES-REG.
+             05 CLIENTES-CHAVE.
+                10 CLIENTES-FONE           PIC 9(09).
+             05 CLIENTES-NOME              PIC X(30).
+             05 CLIENTES-EMAIL             PIC X(40).
       *----------------------------------------------------------------*
        WORKING-STORAGE SECTION.
       *----------------------------------------------------------------*
@@ -34,6 +54,7 @@
        77 WRK-MODULO                    PIC X(025) VALUE SPACES.
        77 WRK-TECLA                     PIC X(001) VALUE SPACES.
        77 WRK-OPCAO-RELATO              PIC X(001) VALUE SPACES.
+       77 WRK-CLIENTES-STATUS           PIC 9(002) VALUE ZEROS.
 
       *----------------------------------------------------------------*
        SCREEN SECTION.
@@ -65,6 +86,17 @@
           05 LINE 14 COLUMN 55 VALUE 'OPCAO......: ' .
           05 LINE 14 COLUMN 68 USING WRK-OPCAO-RELATO.
 
+       01 SRC-REGISTRO.
+            05 CHAVE FOREGROUND-COLOR 2.
+               10 LINE 10 COLUMN 10 VALUE 'TELEFONE '.
+               10 COLUMN PLUS 2 PIC 9(09) USING CLIENTES-FONE
+                   BLANK WHEN ZEROS.
+            05 SS-DADOS.
+               10 LINE 11 COLUMN 10 VALUE 'NOME.... '.
+               10 COLUMN PLUS 2 PIC X(30) USING CLIENTES-NOME.
+               10 LINE 12 COLUMN 10 VALUE 'EMAIL... '.
+               10 COLUMN PLUS 2 PIC X(40) USING CLIENTES-EMAIL.
+
       *----------------------------------------------------------------*
        PROCEDURE DIVISION.
       *----------------------------------------------------------------*
@@ -85,6 +117,12 @@
       *----------------------------------------------------------------*
        1000-INICIAR SECTION.
       *----------------------------------------------------------------*
+           OPEN I-O CLIENTES.
+           IF WRK-CLIENTES-STATUS EQUAL 35 THEN
+              OPEN OUTPUT CLIENTES
+              CLOSE CLIENTES
+              OPEN I-O CLIENTES
+           END-IF.
 
            DISPLAY SCR-TELA.
            ACCEPT SCR-MENU.
@@ -129,7 +167,10 @@
 
            MOVE 'MODULO - INCLUSAO ' TO WRK-MODULO.
            DISPLAY SCR-TELA.
-           ACCEPT WRK-TECLA AT 1620.
+           ACCEPT SRC-REGISTRO.
+           WRITE CLIENTES-REG.
+           DISPLAY SCR-TELA.
+           ACCEPT SCR-MENU.
 
       *----------------------------------------------------------------*
        2100-99-FIM. EXIT.
@@ -159,7 +200,7 @@
        9000-FINALIZAR SECTION.
       *----------------------------------------------------------------*
 
-           CONTINUE.
+           CLOSE CLIENTES.
 
       *----------------------------------------------------------------*
        9000-99-FIM. EXIT.
